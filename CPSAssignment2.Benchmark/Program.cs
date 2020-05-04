@@ -13,7 +13,6 @@ namespace CPSAssignment2.Benchmark
         static void Main(string[] args)
         {
             Console.WriteLine("Initialising");
-
         }
     }
 }

@@ -10,7 +10,8 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionNorm
         public MonBankNormDbContext() : base("mongodb://localhost:27017")
         {
             this.DropDatabase("NormBank");
-            this.GetDatabase("NormBank");
+            var db = this.GetDatabase("NormBank");
+            
         }
 
         public void Dispose()
