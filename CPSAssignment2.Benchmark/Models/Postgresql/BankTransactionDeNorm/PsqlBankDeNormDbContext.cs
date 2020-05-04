@@ -31,6 +31,12 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionDeNorm
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql("Host=127.0.0.1;Port=5432;Database=DeNormBank;Username=postgres;Password=supersafe");
 
-
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .HasKey(c => new { c.ID, c.AccountId});
+        }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
     }
 }
