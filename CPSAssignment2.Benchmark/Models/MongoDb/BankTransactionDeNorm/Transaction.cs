@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +8,8 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionDeNorm
 {
     class Transaction
     {
-        public long ID { get; set; }
+        [BsonId]
+        public ObjectId ID { get; set; }
         public User FromUser { get; set; }
         public User ToUser { get; set; }
         public long FromAccountId { get; set; }

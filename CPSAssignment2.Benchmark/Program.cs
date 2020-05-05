@@ -1,53 +1,85 @@
 ﻿using CPSAssignment2.Benchmark.Models;
 using CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionDeNorm;
 using CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionNorm;
-using CPSAssignment2.Benchmark.Models.MongoDb.MongoTest;
 using CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm;
 using CPSAssignment2.Benchmark.Models.MongoDb.SaleNorm;
 using CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionDeNorm;
 using CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionNorm;
-using CPSAssignment2.Benchmark.Models.Postgresql.PostgresTest;
 using CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm;
 using CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm;
-using MongoDB.Driver;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CPSAssignment2.Benchmark
 {
     class Program
     {
+        private static ConcurrentQueue<MeasurementTool> queue = new ConcurrentQueue<MeasurementTool>();
         static void Main(string[] args)
         {
             Console.WriteLine("Initialising");
             Console.WriteLine("Reading files");
-            
-            ArrayList Items = ParseItem();
-            ArrayList Customers = ParseCustomer();
+            List<MasterItem> Items = ParseItem();
+            List<MasterCustomer> Customers = ParseCustomer();
 
+            DbRunner(new MonBankDeNormDbContext(), Customers,  Items);
+            /*DbRunner(new MonBankNormDbContext(),   Customers,  Items);
 
+            DbRunner(new MonSaleDeNormDbContext(), Customers,  Items);
+            DbRunner(new MonSaleNormDbContext(),   Customers,  Items);
 
-            /*
-            using (MonBankDeNormDbContext db = new MonBankDeNormDbContext()){}
-            using (MonBankNormDbContext db = new MonBankNormDbContext()) {}
+            DbRunner(new PsqlBankDeNormDbContext(),Customers,  Items);
+            DbRunner(new PsqlBankNormDbContext(),  Customers,  Items);
 
-            using (MonSaleDeNormDbContext db = new MonSaleDeNormDbContext()) { }
-            using (MonSaleNormDbContext db = new MonSaleNormDbContext()) { }
-
-            using (PsqlBankDeNormDbContext db = new PsqlBankDeNormDbContext()) { }
-            using (PsqlBankNormDbContext db = new PsqlBankNormDbContext()) { }
-
-            using (PsqlSaleDeNormDbContext db = new PsqlSaleDeNormDbContext()) { }
-            using (PsqlSaleNormDbContext db = new PsqlSaleNormDbContext()) { }
-            */
-
+            DbRunner(new PsqlSaleDeNormDbContext(),Customers,  Items);
+            DbRunner(new PsqlSaleNormDbContext(),  Customers,  Items);*/
         }
 
-        private static ArrayList ParseItem()
+        private static void DbRunner(DbCommonMethods db, List<MasterCustomer> customers, List<MasterItem> items) 
+        {
+            db.Initiate();
+            using (db)
+            {
+                //New thread
+                for (int round = 0; round <= 10; round++)
+                {
+                    for (int threadcount = 1; threadcount <= 8; threadcount *= 2)
+                    {
+                        for (int througput = 100; througput <= 100000; througput *= 10)
+                        {
+                            Thread[] ts = new Thread[threadcount];
+                            for (int i = 0; i < ts.Length; i++)
+                            {
+                                ts[i] = new Thread(() => 
+                                {
+                                    DbCommonMethods obj = (DbCommonMethods)Activator.CreateInstance(Type.GetType(db.GetType().FullName, true));
+                                    MeasurementTool tool = new MeasurementTool();
+                                    obj.seed(items, customers, tool.Stopwatch);
+                                    // REST OF METHODS TO TEST
+                                    // PUBLISH Tool results somwhere global.
+                                    queue.Enqueue(tool);
+                                });
+                            }
+                            Barrier b = new Barrier(threadcount);
+                            foreach (var t in ts)
+                                t.Start();
+                            foreach (var t in ts)
+                                t.Join();
+                        }
+                    }
+                }
+            }
+        }
+        private static List<MasterItem> ParseItem()
         {
             string[] itemsfile = System.IO.File.ReadAllText(@"RandomItems.csv").Split("\n");
-            ArrayList Items = new ArrayList();
+            List<MasterItem> Items = new List<MasterItem>();
             for (int i = 1; i < itemsfile.Length - 1; i++)
             {
                 var k = (itemsfile[i]).Split(";");
@@ -62,9 +94,9 @@ namespace CPSAssignment2.Benchmark
             }
             return Items;
         }
-        private static ArrayList ParseCustomer()
+        private static List<MasterCustomer> ParseCustomer()
         {
-            ArrayList Customers = new ArrayList();
+            List<MasterCustomer> Customers = new List<MasterCustomer>();
             string[] customersfile = System.IO.File.ReadAllText(@"RandomCustomer.csv").Split("\n");
             for (int i = 1; i < customersfile.Length - 1; i++)
             {

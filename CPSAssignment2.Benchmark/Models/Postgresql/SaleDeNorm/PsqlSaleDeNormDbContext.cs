@@ -1,13 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
 {
-    class PsqlSaleDeNormDbContext : DbContext, IDisposable
+    class PsqlSaleDeNormDbContext : DbContext, IDisposable, DbCommonMethods
     {
         public PsqlSaleDeNormDbContext() : base()
+        {
+          
+           
+        }
+        public void Initiate()
         {
             if (this.Database.CanConnect())
             {
@@ -19,7 +25,6 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
                 this.Database.EnsureCreated();
             }
         }
-
         public override void Dispose()
         {
             this.Database.EnsureDeleted();
@@ -37,6 +42,12 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
             modelBuilder.Entity<ItemTag>()
                 .HasKey(c => new { c.Item, c.Tag });
         }
+
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, System.Diagnostics.Stopwatch sw)
+        {
+            throw new NotImplementedException();
+        }
+
         public DbSet<Sale> Sales{ get; set; }
         public DbSet<ItemTag> ItemTags { get; set; }
     }
