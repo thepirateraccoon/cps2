@@ -4,6 +4,7 @@ using System.Text;
 
 namespace CPSAssignment2.Benchmark.Models
 {
+    //Class to hold all data from random data in CSV
     class MasterItem
     {
         public string Name { get; set; }

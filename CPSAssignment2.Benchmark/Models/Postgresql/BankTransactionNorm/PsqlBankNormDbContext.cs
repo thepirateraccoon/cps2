@@ -9,6 +9,8 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionNorm
 {
     class PsqlBankNormDbContext : DbContext, IDisposable, DbCommonMethods
     {
+        public static Type GetTypeName() { return new PsqlBankNormDbContext(true).GetType(); }
+        private PsqlBankNormDbContext(bool b) { }
         public PsqlBankNormDbContext() : base()
         {
             
@@ -35,7 +37,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionNorm
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql("Host=127.0.0.1;Port=5432;Database=NormBank;Username=postgres;Password=supersafe");
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, System.Diagnostics.Stopwatch sw)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
         {
             throw new NotImplementedException();
         }

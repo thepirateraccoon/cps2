@@ -9,6 +9,8 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionDeNorm
 {
     class PsqlBankDeNormDbContext : DbContext, IDisposable, DbCommonMethods
     {
+        public static Type GetTypeName() { return new PsqlBankDeNormDbContext(true).GetType(); }
+        private PsqlBankDeNormDbContext(bool b) { }
         public PsqlBankDeNormDbContext() : base()
         {
             
@@ -42,7 +44,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionDeNorm
                 .HasKey(c => new { c.ID, c.AccountId});
         }
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, System.Diagnostics.Stopwatch sw)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
         {
             throw new NotImplementedException();
         }

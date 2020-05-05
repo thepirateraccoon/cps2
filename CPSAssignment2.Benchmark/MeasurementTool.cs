@@ -5,6 +5,7 @@ using System.Text;
 
 namespace CPSAssignment2.Benchmark
 {
+    //Class to measure, and store work
     class MeasurementTool
     {
         private readonly Stopwatch stopwatch;

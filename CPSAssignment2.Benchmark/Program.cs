@@ -25,53 +25,59 @@ namespace CPSAssignment2.Benchmark
         {
             Console.WriteLine("Initialising");
             Console.WriteLine("Reading files");
+            //Both CSV files has the properties: BuildAction=None, CopyToOutputDir=Always
             List<MasterItem> Items = ParseItem();
             List<MasterCustomer> Customers = ParseCustomer();
 
-            DbRunner(new MonBankDeNormDbContext(), Customers,  Items);
-            /*DbRunner(new MonBankNormDbContext(),   Customers,  Items);
+            DbRunner(MonBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
+            /*DbRunner( MonBankNormDbContext.GetTypeName().FullName,   Customers,  Items);
 
-            DbRunner(new MonSaleDeNormDbContext(), Customers,  Items);
-            DbRunner(new MonSaleNormDbContext(),   Customers,  Items);
+            DbRunner( MonSaleDeNormDbContext.GetTypeName().FullName, Customers,  Items);
+            DbRunner( MonSaleNormDbContext.GetTypeName().FullName,   Customers,  Items);
 
-            DbRunner(new PsqlBankDeNormDbContext(),Customers,  Items);
-            DbRunner(new PsqlBankNormDbContext(),  Customers,  Items);
+            DbRunner( PsqlBankDeNormDbContext.GetTypeName().FullName,Customers,  Items);
+            DbRunner( PsqlBankNormDbContext.GetTypeName().FullName,  Customers,  Items);
 
-            DbRunner(new PsqlSaleDeNormDbContext(),Customers,  Items);
-            DbRunner(new PsqlSaleNormDbContext(),  Customers,  Items);*/
+            DbRunner( PsqlSaleDeNormDbContext.GetTypeName().FullName,Customers,  Items);
+            DbRunner( PsqlSaleNormDbContext.GetTypeName().FullName,  Customers,  Items);*/
         }
 
-        private static void DbRunner(DbCommonMethods db, List<MasterCustomer> customers, List<MasterItem> items) 
+        private static void DbRunner(string db, List<MasterCustomer> customers, List<MasterItem> items)
         {
-            db.Initiate();
-            using (db)
+            Console.WriteLine("Running database type: " + db);
+            for (int round = 0; round <= 10; round++)
             {
-                //New thread
-                for (int round = 0; round <= 10; round++)
+                for (int threadcount = 1; threadcount <= 8; threadcount *= 2)
                 {
-                    for (int threadcount = 1; threadcount <= 8; threadcount *= 2)
+                    for (int througput = 100; througput <= 100000; througput *= 10)
                     {
-                        for (int througput = 100; througput <= 100000; througput *= 10)
+                        //Write progress report
+                        Console.WriteLine(
+                            "\tRunning params: Round=" + round + "/10  Thread= " 
+                            + threadcount + "/8  Througput=" + througput + "/100000");
+
+                        Thread[] ts = new Thread[threadcount];
+                        for (int i = 0; i < ts.Length; i++)
                         {
-                            Thread[] ts = new Thread[threadcount];
-                            for (int i = 0; i < ts.Length; i++)
+                            ts[i] = new Thread(() =>
                             {
-                                ts[i] = new Thread(() => 
-                                {
-                                    DbCommonMethods obj = (DbCommonMethods)Activator.CreateInstance(Type.GetType(db.GetType().FullName, true));
-                                    MeasurementTool tool = new MeasurementTool();
-                                    obj.seed(items, customers, tool.Stopwatch);
-                                    // REST OF METHODS TO TEST
-                                    // PUBLISH Tool results somwhere global.
-                                    queue.Enqueue(tool);
-                                });
-                            }
-                            Barrier b = new Barrier(threadcount);
+                                DbCommonMethods obj = (DbCommonMethods)Activator.CreateInstance(Type.GetType(db, true));
+                                MeasurementTool tool = new MeasurementTool();
+                                obj.seed(items, customers, tool);
+                                
+                                queue.Enqueue(tool);
+                            });
+                        }
+                        using (DbCommonMethods obj = (DbCommonMethods)Activator.CreateInstance(Type.GetType(db, true)))
+                        {
+                            //Initialize DB schemes
+                            obj.Initiate();
                             foreach (var t in ts)
                                 t.Start();
+                            //Run workload
                             foreach (var t in ts)
                                 t.Join();
-                        }
+                        } // TEARDOWN of DB Schemes / data
                     }
                 }
             }

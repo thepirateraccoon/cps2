@@ -8,6 +8,8 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionDeNorm
 {
     class Transaction
     {
+        //ObjectId is a way of telling mongodb that this is the ID attribute
+        //BsonId is the attribut that defines the outmost id of a document (row record ~= collection document)
         [BsonId]
         public ObjectId ID { get; set; }
         public User FromUser { get; set; }

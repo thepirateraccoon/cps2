@@ -8,6 +8,8 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
 {
     class PsqlSaleNormDbContext : DbContext, IDisposable, DbCommonMethods
     {
+        public static Type GetTypeName() { return new PsqlSaleNormDbContext(true).GetType(); }
+        private PsqlSaleNormDbContext(bool b) { }
         public PsqlSaleNormDbContext() : base()
         {
         }
@@ -33,7 +35,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql("Host=127.0.0.1;Port=5432;Database=NormSale;Username=postgres;Password=supersafe");
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, System.Diagnostics.Stopwatch sw)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
         {
             throw new NotImplementedException();
         }

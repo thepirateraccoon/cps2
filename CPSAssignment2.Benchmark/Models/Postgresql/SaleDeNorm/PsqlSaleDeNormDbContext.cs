@@ -8,6 +8,8 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
 {
     class PsqlSaleDeNormDbContext : DbContext, IDisposable, DbCommonMethods
     {
+        public static Type GetTypeName() { return new PsqlSaleDeNormDbContext(true).GetType(); }
+        private PsqlSaleDeNormDbContext(bool b) { }
         public PsqlSaleDeNormDbContext() : base()
         {
           
@@ -43,7 +45,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
                 .HasKey(c => new { c.Item, c.Tag });
         }
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, System.Diagnostics.Stopwatch sw)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
         {
             throw new NotImplementedException();
         }
