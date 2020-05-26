@@ -28,18 +28,58 @@ namespace CPSAssignment2.Benchmark
             //Both CSV files has the properties: BuildAction=None, CopyToOutputDir=Always
             List<MasterItem> Items = ParseItem();
             List<MasterCustomer> Customers = ParseCustomer();
-
-            DbRunner(MonBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
-            /*DbRunner( MonBankNormDbContext.GetTypeName().FullName,   Customers,  Items);
-
-            DbRunner( MonSaleDeNormDbContext.GetTypeName().FullName, Customers,  Items);
-            DbRunner( MonSaleNormDbContext.GetTypeName().FullName,   Customers,  Items);
-
-            DbRunner( PsqlBankDeNormDbContext.GetTypeName().FullName,Customers,  Items);
-            DbRunner( PsqlBankNormDbContext.GetTypeName().FullName,  Customers,  Items);
-
-            DbRunner( PsqlSaleDeNormDbContext.GetTypeName().FullName,Customers,  Items);
-            DbRunner( PsqlSaleNormDbContext.GetTypeName().FullName,  Customers,  Items);*/
+            int cmd = 0;
+            if (args.Length > 0)
+                int.TryParse(args[0], out cmd);
+            switch (cmd)
+            {
+                case 0: // run all as default, arguments can be used when using multiple docker containers
+                    Console.WriteLine("Running all dbs");
+                    DbRunner(MonBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    /*
+                    DbRunner(MonBankNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(MonSaleDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(MonSaleNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(PsqlBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(PsqlBankNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(PsqlSaleDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(PsqlSaleNormDbContext.GetTypeName().FullName, Customers, Items);
+                    */
+                    break;
+                case 1:
+                    Console.WriteLine("Running MonBankDeNormDbContext");
+                    DbRunner(MonBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    break;
+                case 2:
+                    Console.WriteLine("Running MonBankNormDbContext");
+                    DbRunner(MonBankNormDbContext.GetTypeName().FullName, Customers, Items);
+                    break;
+                case 3:
+                    Console.WriteLine("Running MonSaleDeNormDbContext");
+                    DbRunner(MonSaleDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    break;
+                case 4:
+                    Console.WriteLine("Running MonSaleNormDbContext");
+                    DbRunner(MonSaleNormDbContext.GetTypeName().FullName, Customers, Items);
+                    break;
+                case 5:
+                    Console.WriteLine("Running PsqlBankDeNormDbContext");
+                    DbRunner(PsqlBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    break;
+                case 6:
+                    Console.WriteLine("Running PsqlBankNormDbContext");
+                    DbRunner(PsqlBankNormDbContext.GetTypeName().FullName, Customers, Items);
+                    break;
+                case 7:
+                    Console.WriteLine("Running PsqlSaleDeNormDbContext");
+                    DbRunner(PsqlSaleDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    break;
+                case 8:
+                    Console.WriteLine("Running PsqlSaleNormDbContext");
+                    DbRunner(PsqlSaleNormDbContext.GetTypeName().FullName, Customers, Items);
+                    break;
+            }
+            
         }
 
         private static void DbRunner(string db, List<MasterCustomer> customers, List<MasterItem> items)
@@ -62,8 +102,8 @@ namespace CPSAssignment2.Benchmark
                             ts[i] = new Thread(() =>
                             {
                                 DbCommonMethods obj = (DbCommonMethods)Activator.CreateInstance(Type.GetType(db, true));
-                                MeasurementTool tool = new MeasurementTool();
-                                obj.seed(items, customers, tool);
+                                MeasurementTool tool = new MeasurementTool(round, threadcount, througput, db);
+                                obj.seed(items, customers, ref tool);
                                 
                                 queue.Enqueue(tool);
                             });

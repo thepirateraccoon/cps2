@@ -37,7 +37,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionNorm
         //Seed the database but should also be the C (Create) in the CRUD.
         //The two lists are from random data from included CSV files
         //Tool is the one we are going to use to keep track of measrues
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
         {
             List<Account> dbAccount = new List<Account>();
             var documentusr = this.GetDatabase("NormBank").GetCollection<User>("User");

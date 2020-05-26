@@ -28,7 +28,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm
             this.DropDatabase("DeNormSale");
         }
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
         {
             
         }

@@ -33,7 +33,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleNorm
             this.DropDatabase("NormSale");
         }
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
         {
             throw new NotImplementedException();
         }

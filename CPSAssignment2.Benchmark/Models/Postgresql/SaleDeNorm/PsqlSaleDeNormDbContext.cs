@@ -45,7 +45,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
                 .HasKey(c => new { c.Item, c.Tag });
         }
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
         {
             throw new NotImplementedException();
         }

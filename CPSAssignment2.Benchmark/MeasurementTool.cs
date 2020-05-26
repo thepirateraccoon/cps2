@@ -9,11 +9,19 @@ namespace CPSAssignment2.Benchmark
     class MeasurementTool
     {
         private readonly Stopwatch stopwatch;
+        private readonly int round;
+        private readonly int threadcount;
+        private readonly int dbsize;
+        private readonly string DbName;
+        private readonly Dictionary<string, long> querytimings;
         public Stopwatch Stopwatch { get => stopwatch; }
-        public MeasurementTool()
+        public MeasurementTool(int round, int threadcount, int dbsize, string dbname)
         {
             stopwatch = new Stopwatch();
+            querytimings = new Dictionary<string, long>();
+            this.round = round;
+            this.threadcount = threadcount;
+            this.dbsize = dbsize;
         }
-       
     }
 }

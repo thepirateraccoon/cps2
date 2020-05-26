@@ -36,7 +36,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionDeNorm
         //Seed the database but should also be the C (Create) in the CRUD.
         //The two lists are from random data from included CSV files
         //Tool is the one we are going to use to keep track of measrues
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, MeasurementTool tool)
+        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
         {
             List<User> dbUsers = new List<User>();
             foreach (MasterCustomer x in customers)
@@ -50,9 +50,11 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionDeNorm
                 dbUsers.Add(user);
             }
             var document = this.GetDatabase("DeNormBank").GetCollection<User>("User");
+            tool.Stopwatch.Restart();
             tool.Stopwatch.Start();
             document.InsertMany(dbUsers);
             tool.Stopwatch.Stop();
+            
         }
     }
 }
