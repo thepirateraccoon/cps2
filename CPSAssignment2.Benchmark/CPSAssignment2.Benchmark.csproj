@@ -16,6 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Customers.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="RandomCustomer.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

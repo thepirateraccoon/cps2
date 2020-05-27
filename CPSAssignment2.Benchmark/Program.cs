@@ -26,8 +26,19 @@ namespace CPSAssignment2.Benchmark
             Console.WriteLine("Initialising");
             Console.WriteLine("Reading files");
             //Both CSV files has the properties: BuildAction=None, CopyToOutputDir=Always
-            List<MasterItem> Items = ParseItem();
-            List<MasterCustomer> Customers = ParseCustomer();
+            List<MasterItem> Items = null;// = ParseItem();
+            List<MasterCustomer> Customers = GenerateCustomers(50);
+            foreach(MasterCustomer cus in Customers)
+            {
+                Console.WriteLine(
+                    $"Customer: name={cus.Name}, " +
+                    $"age={cus.Age.ToString()}, " +
+                    $"email={cus.Email}" +
+                    $"accounts={cus.Accounts}" +
+                    $"acc1={cus.Account1}" +
+                    $"acc2={cus.Account2}" +
+                    $"acc3={cus.Account3}");
+            }
             int cmd = 0;
             if (args.Length > 0)
                 int.TryParse(args[0], out cmd);
@@ -35,7 +46,7 @@ namespace CPSAssignment2.Benchmark
             {
                 case 0: // run all as default, arguments can be used when using multiple docker containers
                     Console.WriteLine("Running all dbs");
-                    DbRunner(MonBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    //DbRunner(MonBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
                     /*
                     DbRunner(MonBankNormDbContext.GetTypeName().FullName, Customers, Items);
                     DbRunner(MonSaleDeNormDbContext.GetTypeName().FullName, Customers, Items);
@@ -124,7 +135,7 @@ namespace CPSAssignment2.Benchmark
         }
         private static List<MasterItem> ParseItem()
         {
-            string[] itemsfile = System.IO.File.ReadAllText(@"RandomItems.csv").Split("\n");
+            string[] itemsfile = System.IO.File.ReadAllText(@"RandomItems.csv", System.Text.Encoding.A).Split("\n");
             List<MasterItem> Items = new List<MasterItem>();
             for (int i = 1; i < itemsfile.Length - 1; i++)
             {
@@ -140,24 +151,34 @@ namespace CPSAssignment2.Benchmark
             }
             return Items;
         }
-        private static List<MasterCustomer> ParseCustomer()
+        private static List<MasterCustomer> GenerateCustomers(int amount)
         {
             List<MasterCustomer> Customers = new List<MasterCustomer>();
-            string[] customersfile = System.IO.File.ReadAllText(@"RandomCustomer.csv").Split("\n");
-            for (int i = 1; i < customersfile.Length - 1; i++)
+
+            Random ageRandomizer = new Random(1947385);
+            Random nameRandomizer = new Random(46567665);
+            Random accountRandomizer = new Random(38574);
+            Random moneyRandomizer = new Random(395873);
+            Random emailDomainRandomizer = new Random(4563);
+            string[] domains = new[] { "@gmail.com", "@hotmail.com", "@hotmail.dk", "@mail.com" };
+            string[] customersnamegenders = System.IO.File.ReadAllText(@"Customers.csv").Split("\n");
+
+
+            for (int i = 0; i < amount; i++)
             {
-                var k = (customersfile[i]).Split(";");
+                string[] nameGender = customersnamegenders[nameRandomizer.Next(1,customersnamegenders.Length-1)].Split(";");
+                int accounts = accountRandomizer.Next(1, 3);
                 Customers.Add(new MasterCustomer
                 {
-                    Name = k[0],
-                    Email = k[2],
-                    Gender = k[3],
-                    Accounts = int.Parse(k[4]),
-                    Account1 = int.Parse(k[8]),
-                    Account2 = int.Parse(k[9]),
-                    Account3 = int.Parse(k[10]),
-                    Age = int.Parse(k[11])
-                });
+                    Name = nameGender[0],
+                    Email = nameGender[0] + domains[emailDomainRandomizer.Next(0, 3)],
+                    Gender = nameGender[1],
+                    Accounts = accounts,
+                    Account1 = moneyRandomizer.Next(10000, 100000000),
+                    Account2 = (accounts > 1 ? moneyRandomizer.Next(10000, 100000000) : 0),
+                    Account3 = (accounts > 2 ? moneyRandomizer.Next(10000, 100000000) : 0),
+                    Age = ageRandomizer.Next(18, 80)
+                }) ;
             }
             return Customers;
         }
