@@ -6,11 +6,11 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleNorm
 {
-    class Item
+    class TagItem
     {
-        [BsonId]
-        public ObjectId ID { get; set; }
-        public string Name { get; set; }
-        public int Price { get; set; }
+      
+        public ObjectId ItemID { get; set; }
+        
+        public ObjectId TagID { get; set; }
     }
 }

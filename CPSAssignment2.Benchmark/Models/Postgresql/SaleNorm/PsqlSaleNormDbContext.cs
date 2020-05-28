@@ -66,6 +66,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
         {
             Dictionary<string, long> tagger = new Dictionary<string, long>();
             Dictionary<long, Customer> customerdictionary = new Dictionary<long, Customer>();
+            Dictionary<long, Item> itemdictionary = new Dictionary<long, Item>();
             //Dbsize should correspond to the amount of sales already exisitng in the db, which it should be seeded with.
             //Therefore we need to generate customers, and items.
             Console.WriteLine("Adding tags");
@@ -85,11 +86,11 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
                 {
                     ID = item.Id,
                     Name = item.Name,
-                    price = item.Price
+                    Price = item.Price
                 };
                 Items.Add(dbItem);
-                long tmp = -1;
-                tagger.TryGetValue(item.Tag1, out tmp);
+                itemdictionary.Add(item.Id, dbItem);
+                tagger.TryGetValue(item.Tag1, out long tmp);
                 TagItems.Add(new TagItem { ItemId = item.Id, TagId = tmp});
                 if (item.Tag2 != null)
                 {
@@ -144,7 +145,8 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
                     if (!idUsed.Contains(tmpiid))
                     {
                         idUsed.Add(tmpiid);
-                        SaleItems.Add(new SaleItem { SaleId = tmpSale.ID, ItemId = tmpiid, Quantity = itemAmountSelector.Next(1, 5) });
+                        itemdictionary.TryGetValue(tmpiid, out Item item);
+                        SaleItems.Add(new SaleItem { SaleId = tmpSale.ID, ItemId = tmpiid, Quantity = itemAmountSelector.Next(1, 5), ItemPrice = item.Price});
                     }
                     else
                         break;

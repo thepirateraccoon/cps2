@@ -30,7 +30,7 @@ namespace CPSAssignment2.Benchmark
             List<string> tags = TagList(Items);
            
             List<MasterCustomer> Customers = MasterCustomer.GenerateCustomers(30);
-            DbRunnerTest(PsqlSaleDeNormDbContext.GetTypeName().FullName, Customers, Items, tags);
+            DbRunnerTest(MonSaleNormDbContext.GetTypeName().FullName, Customers, Items, tags);
             int cmd = 0;
             if (args.Length > 0)
                 int.TryParse(args[0], out cmd);
