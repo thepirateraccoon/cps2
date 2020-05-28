@@ -128,20 +128,20 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
             MeasurementTool tool = new MeasurementTool(0, 0, 0, "");
             for (int i = 1; i <= dbSize; i++)
             {
-                long tmpcid = (long) customerSelecter.Next(1, customers.Count - 1);
+                long tmpcid = (long) customerSelecter.Next(1, customers.Count);
                 Customer customer = null;
                 customerdictionary.TryGetValue(tmpcid, out customer);
                 var tmpSale = new Sale { 
                     ID = i, Customer = customer, SaleDate = startDate.AddDays(dateSelecotr.Next(range)), 
                     SatisfactoryNumber = satisfactionSelecotr.Next(0, 10),
-                    CouponUsed = false, PurchaseMethod = "Card", StoreLocation = StoreLocation.Locations[StoreSelecotr.Next(0, 8)]
+                    CouponUsed = false, PurchaseMethod = "Card", StoreLocation = StoreLocation.Locations[StoreSelecotr.Next(0, 9)]
                 };
                 Sales.Add(tmpSale);
                 int itemsToBuy = itemTypeSelector.Next(1, 5);
                 List<long> idUsed = new List<long>();
                 for (int j = 0; j < itemsToBuy; j++)
                 {
-                    long tmpiid =  (long) itemSelecter.Next(1, items.Count - 1);
+                    long tmpiid =  (long) itemSelecter.Next(1, items.Count);
                     if (!idUsed.Contains(tmpiid))
                     {
                         idUsed.Add(tmpiid);
@@ -159,9 +159,92 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
 
 
 
-        public void Create(ref MeasurementTool tool)
+        public void Create(ref MeasurementTool tool, List<MasterItem> items = null, List<MasterCustomer> customers = null)
         {
-            throw new NotImplementedException();
+            /*
+            int workloadSize = 10_000;
+            MasterCustomer[] cusArray = MasterCustomer.GenerateCustomers(500, "createNorm", 0).ToArray();
+            MasterItem[] itemArray = items.ToArray();
+
+            Random new_or_oldSelector = new Random(4573);
+            Random customerGenSelector = new Random(867542);
+            Random satisfySelector = new Random(2678);
+            Random storeSelector = new Random(236786);
+            Random diffItemSelector = new Random(83457);
+            Random quantityItemSelector = new Random(6526);
+            Random itemSelector = new Random(572);
+            Random dateSelector = new Random(6762);
+            DateTime startDate = new DateTime(2020, 1, 2);
+            DateTime endDate = new DateTime(2020, 5, 28);
+            int range = (endDate - startDate).Days;
+
+            for (int i = 0; i < workloadSize; i++)
+            {
+                int new_old = new_or_oldSelector.Next(0, 2);
+                string title = new_old == 0 ? "PostgreSQL,Sale,Norm,Create,New user" : "PostgreSQL,Sale,Norm,Create,Existing user";
+                Customer customer = null;
+                //New
+                if (new_old == 0)
+                {
+                    MasterCustomer tmpcustomer = cusArray[customerGenSelector.Next(0, cusArray.Length)];
+                    customer = new Customer
+                    {
+                        ID = ObjectId.GenerateNewId(),
+                        Age = tmpcustomer.Age,
+                        Email = tmpcustomer.Email,
+                        Gender = tmpcustomer.Gender
+                    };
+                    tool.Stopwatch.Start();
+                    Customers.InsertOne(customer);
+                    tool.Stopwatch.Stop();
+                }
+                //Exisiting
+                else
+                {
+                    customer = Customers.AsQueryable().Sample(1).FirstOrDefault();
+                }
+                //Sale creation
+                Sale sale = new Sale
+                {
+                    CustomerID = customer.ID,
+                    SaleDate = startDate.AddDays(dateSelector.Next(range)),
+                    CouponUsed = false,
+                    PurchaseMethod = "Card",
+                    SatisfactoryNumber = satisfySelector.Next(0, 10),
+                    StoreLocation = StoreLocation.Locations[storeSelector.Next(0, 8)]
+                };
+                tool.Stopwatch.Start();
+                Sales.InsertOne(sale);
+                tool.Stopwatch.Stop();
+                //Item selection and Saleitem creation
+                List<string> usedItems = new List<string>();
+                int diffItems = diffItemSelector.Next(1, 5);
+                for (int j = 0; j < diffItems; j++)
+                {
+                    int itemIndex = itemSelector.Next(0, itemArray.Length);
+                    if (!usedItems.Contains(itemArray[itemIndex].Name))
+                    {
+                        // Find item
+                        usedItems.Add(itemArray[itemIndex].Name);
+                        int itemQuant = quantityItemSelector.Next(1, 5);
+                        Item foundItem = Items.Find(item => item.Name.Equals(itemArray[itemIndex].Name)).FirstOrDefault();
+                        // Create SaleItem
+                        SaleItem saleitem = new SaleItem
+                        {
+                            ItemId = foundItem.ID,
+                            SaleId = sale.ID,
+                            Price = foundItem.Price,
+                            Quantity = itemQuant
+                        };
+                        tool.Stopwatch.Start();
+                        SaleItems.InsertOne(saleitem);
+                        tool.Stopwatch.Stop();
+                    }
+                    else
+                        break;
+                }
+                tool.SaveAndReset(title);
+            }*/
         }
 
         public void Read(ref MeasurementTool tool)

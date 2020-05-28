@@ -30,7 +30,7 @@ namespace CPSAssignment2.Benchmark
             List<string> tags = TagList(Items);
            
             List<MasterCustomer> Customers = MasterCustomer.GenerateCustomers(30);
-            DbRunnerTest(MonSaleNormDbContext.GetTypeName().FullName, Customers, Items, tags);
+            DbRunnerTest(PsqlSaleDeNormDbContext.GetTypeName().FullName, Customers, Items, tags);
             int cmd = 0;
             if (args.Length > 0)
                 int.TryParse(args[0], out cmd);
@@ -136,11 +136,10 @@ namespace CPSAssignment2.Benchmark
             {
                 //Initialize DB schemes
                 MeasurementTool tool = new MeasurementTool(1, 1, 100000, db);
-                tool.Stopwatch.Start();
+                
                 obj.Initiate();
                 obj.Seed(1000, items, customers, tags);
-                tool.Stopwatch.Stop();
-                Console.WriteLine(tool.Stopwatch.Elapsed.TotalSeconds);
+                obj.Create(ref tool, items, null);
                 Console.Read();
            
             }

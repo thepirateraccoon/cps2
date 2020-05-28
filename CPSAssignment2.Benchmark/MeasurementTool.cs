@@ -14,6 +14,7 @@ namespace CPSAssignment2.Benchmark
         private readonly int dbsize;
         private readonly string DbName;
         private readonly Dictionary<string, long> querytimings;
+        public Dictionary<string, List<double>> Measures { get; }
         public Stopwatch Stopwatch { get => stopwatch; }
         public MeasurementTool(int round, int threadcount, int dbsize, string dbname)
         {
@@ -22,12 +23,22 @@ namespace CPSAssignment2.Benchmark
             this.round = round;
             this.threadcount = threadcount;
             this.dbsize = dbsize;
+            this.Measures = new Dictionary<string, List<double>>();
         }
         public string SaveAndReset(string title)
         {
-            var mili = stopwatch.Elapsed.TotalMilliseconds;
+            double mili = stopwatch.Elapsed.TotalMilliseconds;
+            if (!Measures.TryGetValue(title, out List<double> current))
+            {
+                current = new List<double>() { mili };
+                Measures.Add(title, current);
+            }
+            else
+            {
+                current.Add(mili);
+            }
             stopwatch.Reset();
-            return $"{title}: {mili}";
+            return $"{title}: {mili}, size: {current.Count}";
         }
     }
 }

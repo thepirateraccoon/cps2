@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using MongoDB.Bson;
+using MongoDB.Driver.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,6 +24,9 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm
             this.GetDatabase("DeNormSale").CreateCollection("Item");
             this.GetDatabase("DeNormSale").CreateCollection("Customer");
         }
+        public IMongoCollection<Sale> Sales { get => this.GetDatabase("DeNormSale").GetCollection<Sale>("Sale"); }
+        public IMongoCollection<Item> Items { get => this.GetDatabase("DeNormSale").GetCollection<Item>("Item"); }
+        public IMongoCollection<Customer> Customers { get => this.GetDatabase("DeNormSale").GetCollection<Customer>("Customer"); }
         public void Seed(int dbSize, List<MasterItem> items, List<MasterCustomer> customers, List<string> tags = null)
         {
             //Structure for later use
@@ -38,8 +42,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm
                 dbCustomers.Add(tmpCus);
                 customerdictionary.Add(customer.Id, tmpCus);
             }
-            var customerDoc = this.GetDatabase("DeNormSale").GetCollection<Customer>("Customer");
-            customerDoc.InsertMany(dbCustomers);
+            Customers.InsertMany(dbCustomers);
 
             //Insert items into db
             Console.WriteLine("Adding items + tags");
@@ -53,8 +56,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm
                 dbItems.Add(tmpItem);
                 itemdictionary.Add(item.Id, tmpItem);
             }
-            var itemDoc = this.GetDatabase("DeNormSale").GetCollection<Item>("Item");
-            itemDoc.InsertMany(dbItems);
+            Items.InsertMany(dbItems);
             
 
             
@@ -74,7 +76,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm
             for (int i = 1; i <= dbSize; i++)
             {
                 //Get user
-                long tmpcid = (long)customerSelecter.Next(1, customers.Count - 1);
+                long tmpcid = (long)customerSelecter.Next(1, customers.Count);
                 customerdictionary.TryGetValue(tmpcid, out Customer customer);
                 customer.SatisfactoryNumber = satisfactionSelecotr.Next(0, 10);
                 //Define items to buy
@@ -83,7 +85,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm
                 List<long> idUsed = new List<long>();
                 for (int j = 0; j < itemsToBuy; j++)
                 {
-                    long tmpiid = (long)itemSelecter.Next(1, items.Count - 1);
+                    long tmpiid = (long)itemSelecter.Next(1, items.Count);
                     if (!idUsed.Contains(tmpiid))
                     {
                         itemdictionary.TryGetValue(tmpcid, out Item item);
@@ -108,21 +110,103 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm
                     PurchasedMethod = "Card",
                     SaleDate = startDate.AddDays(dateSelecotr.Next(range)),
                     CouponUsed = false,
-                    StoreLocation = StoreLocation.Locations[StoreSelecotr.Next(0, 8)]
+                    StoreLocation = StoreLocation.Locations[StoreSelecotr.Next(0, 9)]
                 };
                 sales.Add(sale);
             }
-            var saleDoc = this.GetDatabase("DeNormSale").GetCollection<Sale>("Sale");
-            saleDoc.InsertMany(sales);
+            Sales.InsertMany(sales);
         }
         public void Dispose()
         {
             this.DropDatabase("DeNormSale");
         }
         // TESTING MEASUREMENT METHODS
-        public void Create(ref MeasurementTool tool)
+        public void Create(ref MeasurementTool tool, List<MasterItem> items = null, List<MasterCustomer> customers = null)
         {
-            throw new NotImplementedException();
+            
+            int workloadSize = 10_000;
+            MasterCustomer[] cusArray = MasterCustomer.GenerateCustomers(500, "createDeNorm", 0).ToArray();
+            MasterItem[] itemArray = items.ToArray();
+
+            Random new_or_oldSelector = new Random(4573);
+            Random customerGenSelector = new Random(867542);
+            Random satisfySelector = new Random(2678);
+            Random storeSelector = new Random(236786);
+            Random diffItemSelector = new Random(83457);
+            Random quantityItemSelector = new Random(6526);
+            Random itemSelector = new Random(572);
+            Random dateSelector = new Random(6762);
+            DateTime startDate = new DateTime(2020, 1, 2);
+            DateTime endDate = new DateTime(2020, 5, 28);
+            int range = (endDate - startDate).Days;
+
+            for (int i = 0; i < workloadSize; i++)
+            {
+                int new_old = new_or_oldSelector.Next(0, 2);
+                string title = new_old == 0 ? "Mongo,Sale,DeNorm,Create,New user" : "Mongo,Sale,DeNorm,Create,Existing user";
+                Customer customer = null;
+                //New
+                if (new_old == 0)
+                {
+                    MasterCustomer tmpcustomer = cusArray[customerGenSelector.Next(0, cusArray.Length)];
+                    customer = new Customer
+                    {
+                        ID = ObjectId.GenerateNewId(),
+                        Age = tmpcustomer.Age,
+                        Email = tmpcustomer.Email,
+                        Gender = tmpcustomer.Gender,
+                    };
+                    tool.Stopwatch.Start();
+                    Customers.InsertOne(customer);
+                    tool.Stopwatch.Stop();
+                }
+                //Exisiting
+                else
+                {
+                    customer = Customers.AsQueryable().Sample(1).FirstOrDefault();
+                }
+                customer.SatisfactoryNumber = satisfySelector.Next(0,10);
+                //Item selection and Saleitem creation
+                List<string> usedItems = new List<string>();
+                List<Item> itemList = new List<Item>();
+                int diffItems = diffItemSelector.Next(1, 5);
+                for (int j = 0; j < diffItems; j++)
+                {
+                    int itemIndex = itemSelector.Next(0, itemArray.Length);
+                    if (!usedItems.Contains(itemArray[itemIndex].Name))
+                    {
+                        // Find item
+                        usedItems.Add(itemArray[itemIndex].Name);
+                        int itemQuant = quantityItemSelector.Next(1, 5);
+                        Item foundItem = Items.Find(item => item.Name.Equals(itemArray[itemIndex].Name)).FirstOrDefault();
+                        // Create SaleItem
+                        itemList.Add(new Item 
+                        {
+                            ID = foundItem.ID,
+                            Name = foundItem.Name,
+                            Price = foundItem.Price,
+                            Tags = foundItem.Tags,
+                            Quantity = itemQuant
+                        });
+                    }
+                    else
+                        break;
+                }
+                //Sale creation
+                Sale sale = new Sale
+                {
+                    Customer = customer,
+                    SaleDate = startDate.AddDays(dateSelector.Next(range)),
+                    CouponUsed = false,
+                    PurchasedMethod = "Card",
+                    StoreLocation = StoreLocation.Locations[storeSelector.Next(0, 9)],
+                    Items = itemList
+                };
+                tool.Stopwatch.Start();
+                Sales.InsertOne(sale);
+                tool.Stopwatch.Stop();
+                tool.SaveAndReset(title);
+            }
         }
 
         public void Read(ref MeasurementTool tool)

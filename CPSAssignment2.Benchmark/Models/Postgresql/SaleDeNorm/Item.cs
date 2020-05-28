@@ -8,7 +8,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
     {
         public long ID { get; set; }
         public string Name { get; set; }
-        public int price { get; set; }
+        public int Price { get; set; }
         public List<TagItems> TagItems { get; set; }
     }
 }

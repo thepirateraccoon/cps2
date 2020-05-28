@@ -6,7 +6,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
 {
     public class Sale
     {
-        public long ID { get; set; }
+        public long? ID { get; set; }
         public DateTime Date { get; set; }
         public long ItemId { get; set; }
         public string ItemName { get; set; }

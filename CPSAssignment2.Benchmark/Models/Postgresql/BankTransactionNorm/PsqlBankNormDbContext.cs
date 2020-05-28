@@ -44,7 +44,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionNorm
             throw new NotImplementedException();
         }
 
-        public void Create(ref MeasurementTool tool)
+        public void Create(ref MeasurementTool tool, List<MasterItem> items = null, List<MasterCustomer> customers = null)
         {
             throw new NotImplementedException();
         }

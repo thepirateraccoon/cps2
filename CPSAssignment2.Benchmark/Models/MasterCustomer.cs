@@ -17,7 +17,7 @@ namespace CPSAssignment2.Benchmark.Models
         public long Account2 { get; set; }
         public long Account3 { get; set; }
 
-        public static List<MasterCustomer> GenerateCustomers(int amount, string optionalDomain = null, int optionalIdstart = 0)
+        public static List<MasterCustomer> GenerateCustomers(int amount, string optionalDomain = null, long optionalIdstart = 0)
         {
             List<MasterCustomer> Customers = new List<MasterCustomer>();
             string optdom = "-gen";

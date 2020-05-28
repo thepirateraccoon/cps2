@@ -72,7 +72,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionNorm
         }
         
 
-        public void Create(ref MeasurementTool tool)
+        public void Create(ref MeasurementTool tool, List<MasterItem> items = null, List<MasterCustomer> customers = null)
         {
             throw new NotImplementedException();
         }
