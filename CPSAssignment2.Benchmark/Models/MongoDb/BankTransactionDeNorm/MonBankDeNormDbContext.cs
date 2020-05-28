@@ -28,20 +28,14 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionDeNorm
             this.GetDatabase("DeNormBank").CreateCollection("User");
             this.GetDatabase("DeNormBank").CreateCollection("Transaction");
         }
-        //Tear down
-        public void Dispose()
-        {
-            this.DropDatabase("DeNormBank");
-        }
         //Seed the database but should also be the C (Create) in the CRUD.
         //The two lists are from random data from included CSV files
-        //Tool is the one we are going to use to keep track of measrues
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
+        public void Seed(int dbSize, List<MasterItem> items, List<MasterCustomer> customers, List<string> tags = null)
         {
             List<User> dbUsers = new List<User>();
             foreach (MasterCustomer x in customers)
             {
-                List <Account> accounts = new List<Account>();
+                List<Account> accounts = new List<Account>();
                 //ObjectId.GenerateNewId() generate a new obj id since the idObject in Account wont be recocgnized as primary key.
                 if (x.Accounts > 0) { accounts.Add(new Account { Money = x.Account1, Saldo = x.Account1, ID = ObjectId.GenerateNewId() }); }
                 if (x.Accounts > 1) { accounts.Add(new Account { Money = x.Account2, Saldo = x.Account2, ID = ObjectId.GenerateNewId() }); }
@@ -50,11 +44,29 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.BankTransactionDeNorm
                 dbUsers.Add(user);
             }
             var document = this.GetDatabase("DeNormBank").GetCollection<User>("User");
-            tool.Stopwatch.Restart();
-            tool.Stopwatch.Start();
+  
             document.InsertMany(dbUsers);
-            tool.Stopwatch.Stop();
-            
+           
+        }
+        //Tear down
+        public void Dispose()
+        {
+            this.DropDatabase("DeNormBank");
+        }
+
+        public void Create(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Read(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Updater(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
         }
     }
 }

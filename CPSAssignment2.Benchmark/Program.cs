@@ -26,19 +26,11 @@ namespace CPSAssignment2.Benchmark
             Console.WriteLine("Initialising");
             Console.WriteLine("Reading files");
             //Both CSV files has the properties: BuildAction=None, CopyToOutputDir=Always
-            List<MasterItem> Items = null;// = ParseItem();
-            List<MasterCustomer> Customers = GenerateCustomers(50);
-            foreach(MasterCustomer cus in Customers)
-            {
-                Console.WriteLine(
-                    $"Customer: name={cus.Name}, " +
-                    $"age={cus.Age.ToString()}, " +
-                    $"email={cus.Email}" +
-                    $"accounts={cus.Accounts}" +
-                    $"acc1={cus.Account1}" +
-                    $"acc2={cus.Account2}" +
-                    $"acc3={cus.Account3}");
-            }
+            List<MasterItem> Items = ParseItem();
+            List<string> tags = TagList(Items);
+           
+            List<MasterCustomer> Customers = MasterCustomer.GenerateCustomers(30);
+            DbRunnerTest(PsqlSaleNormDbContext.GetTypeName().FullName, Customers, Items, tags);
             int cmd = 0;
             if (args.Length > 0)
                 int.TryParse(args[0], out cmd);
@@ -59,53 +51,75 @@ namespace CPSAssignment2.Benchmark
                     break;
                 case 1:
                     Console.WriteLine("Running MonBankDeNormDbContext");
-                    DbRunner(MonBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(MonBankDeNormDbContext.GetTypeName().FullName, Customers, Items, tags);
                     break;
                 case 2:
                     Console.WriteLine("Running MonBankNormDbContext");
-                    DbRunner(MonBankNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(MonBankNormDbContext.GetTypeName().FullName, Customers, Items, tags);
                     break;
                 case 3:
                     Console.WriteLine("Running MonSaleDeNormDbContext");
-                    DbRunner(MonSaleDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(MonSaleDeNormDbContext.GetTypeName().FullName, Customers, Items, tags);
                     break;
                 case 4:
                     Console.WriteLine("Running MonSaleNormDbContext");
-                    DbRunner(MonSaleNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(MonSaleNormDbContext.GetTypeName().FullName, Customers, Items, tags);
                     break;
                 case 5:
                     Console.WriteLine("Running PsqlBankDeNormDbContext");
-                    DbRunner(PsqlBankDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(PsqlBankDeNormDbContext.GetTypeName().FullName, Customers, Items, tags);
                     break;
                 case 6:
                     Console.WriteLine("Running PsqlBankNormDbContext");
-                    DbRunner(PsqlBankNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(PsqlBankNormDbContext.GetTypeName().FullName, Customers, Items, tags);
                     break;
                 case 7:
                     Console.WriteLine("Running PsqlSaleDeNormDbContext");
-                    DbRunner(PsqlSaleDeNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(PsqlSaleDeNormDbContext.GetTypeName().FullName, Customers, Items, tags);
                     break;
                 case 8:
                     Console.WriteLine("Running PsqlSaleNormDbContext");
-                    DbRunner(PsqlSaleNormDbContext.GetTypeName().FullName, Customers, Items);
+                    DbRunner(PsqlSaleNormDbContext.GetTypeName().FullName, Customers, Items, tags);
                     break;
             }
             
         }
 
-        private static void DbRunner(string db, List<MasterCustomer> customers, List<MasterItem> items)
+        private static List<string> TagList(List<MasterItem> items)
+        {
+            List<string> tags = new List<string>();
+            Dictionary<string, string> taggs = new Dictionary<string, string>();
+            foreach (MasterItem item in items)
+            {
+
+                if (!taggs.ContainsKey(item.Tag1)) taggs.Add(item.Tag1, null);
+                if (item.Tag2 != null)
+                    if (!taggs.ContainsKey(item.Tag2)) 
+                        taggs.Add(item.Tag2, null);
+                if (item.Tag3 != null)
+                    if (!taggs.ContainsKey(item.Tag3)) 
+                        taggs.Add(item.Tag3, null);
+            }
+            foreach (string key in taggs.Keys)
+            {
+                tags.Add(key);
+            }
+            return tags;
+        }
+
+        private static void DbRunner(string db, List<MasterCustomer> customers, List<MasterItem> items, List<string> tags)
         {
             Console.WriteLine("Running database type: " + db);
             for (int round = 0; round <= 10; round++)
             {
                 for (int threadcount = 1; threadcount <= 8; threadcount *= 2)
                 {
-                    for (int througput = 100; througput <= 100000; througput *= 10)
+                    for (int dbSizeFactor = 100; dbSizeFactor <= 100000; dbSizeFactor *= 10)
                     {
                         //Write progress report
                         Console.WriteLine(
                             "\tRunning params: Round=" + round + "/10  Thread= " 
-                            + threadcount + "/8  Througput=" + througput + "/100000");
+                            + threadcount + "/8  Througput=" + dbSizeFactor + "/100000");
 
                         Thread[] ts = new Thread[threadcount];
                         for (int i = 0; i < ts.Length; i++)
@@ -113,9 +127,10 @@ namespace CPSAssignment2.Benchmark
                             ts[i] = new Thread(() =>
                             {
                                 DbCommonMethods obj = (DbCommonMethods)Activator.CreateInstance(Type.GetType(db, true));
-                                MeasurementTool tool = new MeasurementTool(round, threadcount, througput, db);
-                                obj.seed(items, customers, ref tool);
-                                
+                                MeasurementTool tool = new MeasurementTool(round, threadcount, dbSizeFactor, db);
+                                obj.Create(ref tool);
+                                obj.Read(ref tool);
+                                obj.Updater(ref tool);
                                 queue.Enqueue(tool);
                             });
                         }
@@ -123,6 +138,7 @@ namespace CPSAssignment2.Benchmark
                         {
                             //Initialize DB schemes
                             obj.Initiate();
+                            obj.Seed(dbSizeFactor, items, customers, tags);
                             foreach (var t in ts)
                                 t.Start();
                             //Run workload
@@ -133,54 +149,40 @@ namespace CPSAssignment2.Benchmark
                 }
             }
         }
+        private static void DbRunnerTest(string db, List<MasterCustomer> customers, List<MasterItem> items, List<string> tags)
+        {
+            Console.WriteLine("Running database Test type: " + db);
+            using (DbCommonMethods obj = (DbCommonMethods)Activator.CreateInstance(Type.GetType(db, true)))
+            {
+                //Initialize DB schemes
+                MeasurementTool tool = new MeasurementTool(1, 1, 100000, db);
+                tool.Stopwatch.Start();
+                obj.Initiate();
+                obj.Seed(100000, items, customers, tags);
+                tool.Stopwatch.Stop();
+                Console.WriteLine(tool.Stopwatch.Elapsed.TotalSeconds); 
+           
+            }
+                  
+        }
         private static List<MasterItem> ParseItem()
         {
-            string[] itemsfile = System.IO.File.ReadAllText(@"RandomItems.csv", System.Text.Encoding.A).Split("\n");
+            string[] itemsfile = System.IO.File.ReadAllText(@"Items.csv", System.Text.Encoding.UTF8).Split("\n");
             List<MasterItem> Items = new List<MasterItem>();
             for (int i = 1; i < itemsfile.Length - 1; i++)
             {
-                var k = (itemsfile[i]).Split(";");
+                var k = (itemsfile[i]).Split(",");
                 Items.Add(new MasterItem
                 {
-                    Price = int.Parse(k[0]),
+                    Id = int.Parse(k[0]),
                     Name = k[1],
-                    Tag1 = k[2],
-                    Tag2 = k[3],
-                    Tag3 = k[4]
+                    Price = int.Parse(k[2]),
+                    Tag1 = k[3],
+                    Tag2 = (k[4].Equals(k[3]) ? null : k[4] ),
+                    Tag3 = (k[5].Equals(k[4]) ? null : k[5])
                 });
             }
             return Items;
-        }
-        private static List<MasterCustomer> GenerateCustomers(int amount)
-        {
-            List<MasterCustomer> Customers = new List<MasterCustomer>();
-
-            Random ageRandomizer = new Random(1947385);
-            Random nameRandomizer = new Random(46567665);
-            Random accountRandomizer = new Random(38574);
-            Random moneyRandomizer = new Random(395873);
-            Random emailDomainRandomizer = new Random(4563);
-            string[] domains = new[] { "@gmail.com", "@hotmail.com", "@hotmail.dk", "@mail.com" };
-            string[] customersnamegenders = System.IO.File.ReadAllText(@"Customers.csv").Split("\n");
-
-
-            for (int i = 0; i < amount; i++)
-            {
-                string[] nameGender = customersnamegenders[nameRandomizer.Next(1,customersnamegenders.Length-1)].Split(";");
-                int accounts = accountRandomizer.Next(1, 3);
-                Customers.Add(new MasterCustomer
-                {
-                    Name = nameGender[0],
-                    Email = nameGender[0] + domains[emailDomainRandomizer.Next(0, 3)],
-                    Gender = nameGender[1],
-                    Accounts = accounts,
-                    Account1 = moneyRandomizer.Next(10000, 100000000),
-                    Account2 = (accounts > 1 ? moneyRandomizer.Next(10000, 100000000) : 0),
-                    Account3 = (accounts > 2 ? moneyRandomizer.Next(10000, 100000000) : 0),
-                    Age = ageRandomizer.Next(18, 80)
-                }) ;
-            }
-            return Customers;
         }
     }
 }

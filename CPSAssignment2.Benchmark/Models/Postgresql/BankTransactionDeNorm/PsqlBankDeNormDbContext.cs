@@ -44,12 +44,28 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionDeNorm
                 .HasKey(c => new { c.ID, c.AccountId});
         }
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
+
+
+        public void Seed(int dbSize, List<MasterItem> items, List<MasterCustomer> customers, List<string> tags = null)
         {
             throw new NotImplementedException();
         }
 
-        
+        public void Create(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+            
+        }
+
+        public void Read(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Updater(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Transaction> Transactions { get; set; }

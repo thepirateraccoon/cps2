@@ -14,10 +14,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleNorm
     {
         public static Type GetTypeName() { return new MonSaleNormDbContext(true).GetType(); }
         private MonSaleNormDbContext(bool b) { }
-        public MonSaleNormDbContext() : base("mongodb://localhost:27017")
-        {
-            
-        }
+        public MonSaleNormDbContext() : base("mongodb://localhost:27017"){}
         public void Initiate()
         {
             this.DropDatabase("NormSale");
@@ -28,12 +25,26 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleNorm
             this.GetDatabase("NormSale").CreateCollection("Tag");
             this.GetDatabase("NormSale").CreateCollection("Customer");
         }
+        public void Seed(int dbSize, List<MasterItem> items, List<MasterCustomer> customers, List<string> tags = null)
+        {
+            throw new NotImplementedException();
+        }
         public void Dispose()
         {
             this.DropDatabase("NormSale");
         }
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
+        public void Create(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Read(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Updater(ref MeasurementTool tool)
         {
             throw new NotImplementedException();
         }

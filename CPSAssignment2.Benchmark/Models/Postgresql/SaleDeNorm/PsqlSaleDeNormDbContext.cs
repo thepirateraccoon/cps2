@@ -27,6 +27,10 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
                 this.Database.EnsureCreated();
             }
         }
+        public void Seed(int dbSize, List<MasterItem> items, List<MasterCustomer> customers, List<string> tags = null)
+        {
+            throw new NotImplementedException();
+        }
         public override void Dispose()
         {
             this.Database.EnsureDeleted();
@@ -44,8 +48,17 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
             modelBuilder.Entity<ItemTag>()
                 .HasKey(c => new { c.Item, c.Tag });
         }
+        public void Create(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
+        public void Read(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Updater(ref MeasurementTool tool)
         {
             throw new NotImplementedException();
         }

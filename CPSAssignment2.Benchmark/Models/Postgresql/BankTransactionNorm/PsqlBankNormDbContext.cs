@@ -37,7 +37,24 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.BankTransactionNorm
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder.UseNpgsql("Host=127.0.0.1;Port=5432;Database=NormBank;Username=postgres;Password=supersafe");
 
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool)
+
+
+        public void Seed(int dbSize, List<MasterItem> items, List<MasterCustomer> customers, List<string> tags = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Create(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Read(ref MeasurementTool tool)
+        {
+            throw new NotImplementedException();
+        }
+        
+        public void Updater(ref MeasurementTool tool)
         {
             throw new NotImplementedException();
         }

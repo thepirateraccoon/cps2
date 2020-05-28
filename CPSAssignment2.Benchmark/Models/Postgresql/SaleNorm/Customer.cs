@@ -1,10 +1,10 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
 {
-    class Customer
+    public class Customer
     {
         public long ID { get; set; }
         public string Gender { get; set; }

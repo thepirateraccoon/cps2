@@ -8,7 +8,10 @@ namespace CPSAssignment2.Benchmark.Models
     interface DbCommonMethods : IDisposable
     {
         public void Initiate();
-        public void seed(List<MasterItem> items, List<MasterCustomer> customers, ref MeasurementTool tool);
+        public void Seed(int dbSize, List<MasterItem> items = null, List<MasterCustomer> customers = null, List<string> tags = null);
+        public void Create(ref MeasurementTool tool);
+        public void Read(ref MeasurementTool tool);
+        public void Updater(ref MeasurementTool tool);
 
     }
 }

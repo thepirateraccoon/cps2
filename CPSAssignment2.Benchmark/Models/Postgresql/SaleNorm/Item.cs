@@ -4,10 +4,12 @@ using System.Text;
 
 namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
 {
-    class Item
+    public class Item
     {
         public long ID { get; set; }
         public string Name { get; set; }
-        public long price { get; set; }
+        public int price { get; set; }
+        public List<TagItem> TagItems { get; set; }
+        public List<SaleItem> SaleItems { get; set; }
     }
 }

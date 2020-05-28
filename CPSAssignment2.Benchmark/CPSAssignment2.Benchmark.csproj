@@ -19,6 +19,12 @@
     <None Update="Customers.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Customers_utf8.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Items.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="RandomCustomer.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
