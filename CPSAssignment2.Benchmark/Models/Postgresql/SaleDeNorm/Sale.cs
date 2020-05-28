@@ -4,10 +4,11 @@ using System.Text;
 
 namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
 {
-    class Sale
+    public class Sale
     {
         public long ID { get; set; }
         public DateTime Date { get; set; }
+        public long ItemId { get; set; }
         public string ItemName { get; set; }
         public long ItemPrice { get; set; }
         public long ItemQuantity { get; set; }

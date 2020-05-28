@@ -30,7 +30,7 @@ namespace CPSAssignment2.Benchmark
             List<string> tags = TagList(Items);
            
             List<MasterCustomer> Customers = MasterCustomer.GenerateCustomers(30);
-            DbRunnerTest(PsqlSaleNormDbContext.GetTypeName().FullName, Customers, Items, tags);
+            DbRunnerTest(PsqlSaleDeNormDbContext.GetTypeName().FullName, Customers, Items, tags);
             int cmd = 0;
             if (args.Length > 0)
                 int.TryParse(args[0], out cmd);
@@ -85,27 +85,7 @@ namespace CPSAssignment2.Benchmark
             
         }
 
-        private static List<string> TagList(List<MasterItem> items)
-        {
-            List<string> tags = new List<string>();
-            Dictionary<string, string> taggs = new Dictionary<string, string>();
-            foreach (MasterItem item in items)
-            {
-
-                if (!taggs.ContainsKey(item.Tag1)) taggs.Add(item.Tag1, null);
-                if (item.Tag2 != null)
-                    if (!taggs.ContainsKey(item.Tag2)) 
-                        taggs.Add(item.Tag2, null);
-                if (item.Tag3 != null)
-                    if (!taggs.ContainsKey(item.Tag3)) 
-                        taggs.Add(item.Tag3, null);
-            }
-            foreach (string key in taggs.Keys)
-            {
-                tags.Add(key);
-            }
-            return tags;
-        }
+       
 
         private static void DbRunner(string db, List<MasterCustomer> customers, List<MasterItem> items, List<string> tags)
         {
@@ -158,9 +138,10 @@ namespace CPSAssignment2.Benchmark
                 MeasurementTool tool = new MeasurementTool(1, 1, 100000, db);
                 tool.Stopwatch.Start();
                 obj.Initiate();
-                obj.Seed(100000, items, customers, tags);
+                obj.Seed(1000, items, customers, tags);
                 tool.Stopwatch.Stop();
-                Console.WriteLine(tool.Stopwatch.Elapsed.TotalSeconds); 
+                Console.WriteLine(tool.Stopwatch.Elapsed.TotalSeconds);
+                Console.Read();
            
             }
                   
@@ -177,12 +158,34 @@ namespace CPSAssignment2.Benchmark
                     Id = int.Parse(k[0]),
                     Name = k[1],
                     Price = int.Parse(k[2]),
-                    Tag1 = k[3],
-                    Tag2 = (k[4].Equals(k[3]) ? null : k[4] ),
-                    Tag3 = (k[5].Equals(k[4]) ? null : k[5])
+                    Tag1 = (k[3].Trim().Equals("") ? null :  k[3]),
+                    Tag2 = (k[4].Equals(k[3]) || k[4].Trim().Equals("") ? null : k[4] ),
+                    Tag3 = (k[5].Equals(k[4]) || k[5].Trim().Equals("") ? null : k[5])
                 });
             }
             return Items;
+        }
+        private static List<string> TagList(List<MasterItem> items)
+        {
+            List<string> tags = new List<string>();
+            Dictionary<string, string> taggs = new Dictionary<string, string>();
+            foreach (MasterItem item in items)
+            {
+
+                if (!taggs.ContainsKey(item.Tag1)) taggs.Add(item.Tag1, null);
+                if (item.Tag2 != null)
+                    if (!taggs.ContainsKey(item.Tag2))
+                        taggs.Add(item.Tag2, null);
+                if (item.Tag3 != null)
+                    if (!taggs.ContainsKey(item.Tag3))
+                        taggs.Add(item.Tag3, null);
+            }
+            foreach (string key in taggs.Keys)
+            {
+                if (!key.Trim().Equals(""))
+                    tags.Add(key);
+            }
+            return tags;
         }
     }
 }

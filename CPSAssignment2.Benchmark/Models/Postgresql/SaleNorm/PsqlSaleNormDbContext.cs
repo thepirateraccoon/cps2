@@ -120,18 +120,22 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
             Random itemSelecter = new Random(6463526);
             Random dateSelecotr = new Random(3435468);
             Random satisfactionSelecotr = new Random(39843);
+            Random StoreSelecotr = new Random(74626);
             DateTime startDate = new DateTime(2015, 1, 1);
             DateTime endDate = new DateTime(2020, 1, 1);
             int range = (endDate - startDate).Days;
-            for (int i = 0; i < dbSize; i++)
+            MeasurementTool tool = new MeasurementTool(0, 0, 0, "");
+            for (int i = 1; i <= dbSize; i++)
             {
-                //Console.WriteLine($"{i} of {dbSize}");
                 long tmpcid = (long) customerSelecter.Next(1, customers.Count - 1);
                 Customer customer = null;
                 customerdictionary.TryGetValue(tmpcid, out customer);
-                var tmpSale = new Sale { Customer = customer, SaleDate = startDate.AddDays(dateSelecotr.Next(range)), SatisfactoryNumber = satisfactionSelecotr.Next(0, 10) };
+                var tmpSale = new Sale { 
+                    ID = i, Customer = customer, SaleDate = startDate.AddDays(dateSelecotr.Next(range)), 
+                    SatisfactoryNumber = satisfactionSelecotr.Next(0, 10),
+                    CouponUsed = false, PurchaseMethod = "Card", StoreLocation = StoreLocation.Locations[StoreSelecotr.Next(0, 8)]
+                };
                 Sales.Add(tmpSale);
-                SaveChanges();
                 int itemsToBuy = itemTypeSelector.Next(1, 5);
                 List<long> idUsed = new List<long>();
                 for (int j = 0; j < itemsToBuy; j++)
@@ -145,6 +149,7 @@ namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleNorm
                     else
                         break;
                 }
+        
             }
             //Then insert seeded sales into the db
             SaveChanges();

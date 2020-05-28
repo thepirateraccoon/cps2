@@ -24,7 +24,7 @@ namespace CPSAssignment2.Benchmark.Models.MongoDb.SaleDeNorm
         }
         public void Seed(int dbSize, List<MasterItem> items, List<MasterCustomer> customers, List<string> tags = null)
         {
-            throw new NotImplementedException();
+            
         }
         public void Dispose()
         {

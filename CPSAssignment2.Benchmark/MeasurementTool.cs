@@ -23,5 +23,11 @@ namespace CPSAssignment2.Benchmark
             this.threadcount = threadcount;
             this.dbsize = dbsize;
         }
+        public string SaveAndReset(string title)
+        {
+            var mili = stopwatch.Elapsed.TotalMilliseconds;
+            stopwatch.Reset();
+            return $"{title}: {mili}";
+        }
     }
 }

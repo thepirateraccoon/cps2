@@ -4,9 +4,10 @@ using System.Text;
 
 namespace CPSAssignment2.Benchmark.Models.Postgresql.SaleDeNorm
 {
-    class ItemTag
+    public class Tag
     {
-        public string Item { get; set; }
-        public string Tag { get; set; }
+        public long ID { get; set; }
+        public string Name { get; set; }
+        public List<TagItems> TagItems { get; set; }
     }
 }
